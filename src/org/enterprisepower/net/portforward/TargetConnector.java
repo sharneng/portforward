@@ -16,26 +16,26 @@
 
 package org.enterprisepower.net.portforward;
 
-import org.apache.commons.logging.Log; 
-import org.apache.commons.logging.LogFactory; 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import java.net.*;
 
 /**
  * 
  * @author Kenneth Xu
- *
+ * 
  */
 public class TargetConnector {
-    private static Log log = LogFactory.getLog(TargetConnector.class);
-    private InetSocketAddress to;
+	private static Log log = LogFactory.getLog(TargetConnector.class);
+	private InetSocketAddress to;
 
-    public TargetConnector( InetSocketAddress to ) {
-        log.trace( "new ServerConnectionManager( InetSocketAddress )" );
-        this.to = to;
-    }
+	public TargetConnector(InetSocketAddress to) {
+		log.trace("new ServerConnectionManager( InetSocketAddress )");
+		this.to = to;
+	}
 
-    public Socket openSocket() throws java.io.IOException {
-        return new Socket(to.getAddress(), to.getPort());
-    }
+	public Socket openSocket() throws java.io.IOException {
+		return new Socket(to.getAddress(), to.getPort());
+	}
 
 }

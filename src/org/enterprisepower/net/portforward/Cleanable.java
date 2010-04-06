@@ -18,9 +18,10 @@ package org.enterprisepower.net.portforward;
 /**
  * 
  * @author Kenneth Xu
- *
+ * 
  */
 public interface Cleanable {
 	public boolean isCompleted();
+
 	public void close();
 }
