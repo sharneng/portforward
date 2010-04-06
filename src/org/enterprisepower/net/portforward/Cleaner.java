@@ -31,7 +31,7 @@ import org.apache.commons.logging.LogFactory;
 public class Cleaner implements Runnable {
     private static final Log log = LogFactory.getLog(Cleaner.class); 
 	
-	List list = new ArrayList();
+	List<Cleanable> list = new ArrayList<Cleanable>();
 
 	public void run() {
 		cleanup();
@@ -39,8 +39,8 @@ public class Cleaner implements Runnable {
 	
 	public synchronized void cleanup() {
 		while(true) {
-			for (Iterator itr=list.iterator(); itr.hasNext();) {
-				Cleanable p = (Cleanable) itr.next();
+			for (Iterator<Cleanable> itr=list.iterator(); itr.hasNext();) {
+				Cleanable p = itr.next();
 				if (p.isCompleted()) {
 					p.close();
 					itr.remove();

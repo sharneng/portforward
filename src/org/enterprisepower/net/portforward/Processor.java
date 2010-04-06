@@ -75,7 +75,6 @@ public class Processor implements Cleanable {
     private class Copier implements Runnable {
     	Socket in;
     	Socket out;
-        Throwable exception;
         boolean isCompleted = false;
             
         Copier(Socket in, Socket out) {

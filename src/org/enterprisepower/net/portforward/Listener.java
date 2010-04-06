@@ -26,7 +26,7 @@ import java.io.*;
  * @author Kenneth Xu
  *
  */
-class Listener implements Runnable {
+public class Listener implements Runnable {
     private static Log log = LogFactory.getLog(Listener.class); 
     private ServerSocket serverSocket;
     private InetSocketAddress from, to;
