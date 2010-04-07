@@ -26,87 +26,83 @@ import org.enterprisepower.net.NetUtils;
 /**
  * 
  * @author Kenneth Xu
- * 
+ *
  */
 public class Processor implements Cleanable {
-	private static final Log log = LogFactory.getLog(Processor.class);
+    private static final Log log = LogFactory.getLog(Processor.class); 
 
-	private Socket source;
-	private Socket target;
-	private Cleaner cleaner;
+    private Socket source;
+    private Socket target;
+    private Cleaner cleaner;
 
-	Copier req;
-	Copier res;
+    Copier req;
+    Copier res;
 
-	public Processor(Socket source, Socket target, Cleaner cleaner) {
-		this.source = source;
-		this.target = target;
-		this.cleaner = cleaner;
-		cleaner.add(this);
+	public Processor( Socket source, Socket target, Cleaner cleaner ) {
+    	this.source = source;
+    	this.target = target;
+    	this.cleaner = cleaner;
+    	cleaner.add(this);
 	}
-
+	
 	public void process() {
 
 		req = new Copier(source, target);
-		res = new Copier(target, source);
+        res = new Copier(target, source);
 
-		new Thread(req).start();
-		new Thread(res).start();
-		if (log.isTraceEnabled()) {
-			log.trace("started new request stream copier threads: " + req);
-			log.trace("started new response stream copier threads: " + res);
-		}
+        new Thread(req).start();
+        new Thread(res).start();
+        if (log.isTraceEnabled()) {
+            log.trace( "started new request stream copier threads: " + req );
+            log.trace( "started new response stream copier threads: " + res );
+        }
 	}
-
+	
 	public boolean isCompleted() {
 		return req.isCompleted && res.isCompleted;
 	}
-
+	
 	public void close() {
-		if (log.isTraceEnabled())
-			log.trace("close() called on " + this);
+		if (log.isTraceEnabled()) log.trace("close() called on " + this);
 		NetUtils.close(source);
 		NetUtils.close(target);
 	}
+	
+    public String toString() {
+    	return this.getClass().getName() + "(from " + source + " to " + target + ")";
+    }
+    
+    private class Copier implements Runnable {
+    	Socket in;
+    	Socket out;
+        Throwable exception;
+        boolean isCompleted = false;
+            
+        Copier(Socket in, Socket out) {
+        	this.in = in;
+        	this.out = out;
+        }
 
-	public String toString() {
-		return this.getClass().getName() + "(from " + source + " to " + target
-				+ ")";
-	}
+        public void run( ) {
+            try {
+                IOUtils.copyStream(in.getInputStream(), out.getOutputStream(), false);
+            } catch (java.net.SocketException e) {
+            	NetUtils.shutdown(source);
+            	NetUtils.shutdown(target);
+            	log.debug(this, e);
+            } catch (Exception e) {
+                log.error(this, e);
+            } finally {
+            	this.isCompleted = true;
+            	if (cleaner!=null) synchronized (cleaner) {
+            		cleaner.notify();
+            	}
+            }
+        }
+        
+        public String toString() {
+        	return this.getClass().getName() + "(from " + in + " to " + out  + ")";
+        }
 
-	private class Copier implements Runnable {
-		Socket in;
-		Socket out;
-		boolean isCompleted = false;
-
-		Copier(Socket in, Socket out) {
-			this.in = in;
-			this.out = out;
-		}
-
-		public void run() {
-			try {
-				IOUtils.copyStream(in.getInputStream(), out.getOutputStream(),
-						false);
-			} catch (java.net.SocketException e) {
-				NetUtils.shutdown(source);
-				NetUtils.shutdown(target);
-				log.debug(this, e);
-			} catch (Exception e) {
-				log.error(this, e);
-			} finally {
-				this.isCompleted = true;
-				if (cleaner != null)
-					synchronized (cleaner) {
-						cleaner.notify();
-					}
-			}
-		}
-
-		public String toString() {
-			return this.getClass().getName() + "(from " + in + " to " + out
-					+ ")";
-		}
-
-	}
+    }
 }

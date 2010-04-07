@@ -26,21 +26,21 @@ import org.apache.commons.logging.LogFactory;
 /**
  * 
  * @author Kenneth Xu
- * 
+ *
  */
 public class Cleaner implements Runnable {
-	private static final Log log = LogFactory.getLog(Cleaner.class);
-
-	List<Cleanable> list = new ArrayList<Cleanable>();
+    private static final Log log = LogFactory.getLog(Cleaner.class); 
+	
+	List list = new ArrayList();
 
 	public void run() {
 		cleanup();
 	}
-
+	
 	public synchronized void cleanup() {
-		while (true) {
-			for (Iterator<Cleanable> itr = list.iterator(); itr.hasNext();) {
-				Cleanable p = itr.next();
+		while(true) {
+			for (Iterator itr=list.iterator(); itr.hasNext();) {
+				Cleanable p = (Cleanable) itr.next();
 				if (p.isCompleted()) {
 					p.close();
 					itr.remove();
@@ -53,7 +53,7 @@ public class Cleaner implements Runnable {
 			}
 		}
 	}
-
+	
 	public synchronized void add(Cleanable p) {
 		list.add(p);
 	}

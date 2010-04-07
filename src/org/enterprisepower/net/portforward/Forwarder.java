@@ -21,7 +21,7 @@ import org.enterprisepower.net.NetUtils;
 /**
  * 
  * @author Kenneth Xu
- * 
+ *
  */
 public class Forwarder {
 
@@ -29,9 +29,9 @@ public class Forwarder {
 	 * @param args
 	 */
 	public static void main(String[] args) throws Exception {
-		Listener listener = new Listener(NetUtils
-				.parseInetSocketAddress(args[0]), NetUtils
-				.parseInetSocketAddress(args[1]));
+		Listener listener = new Listener( 
+				NetUtils.parseInetSocketAddress(args[0]), 
+				NetUtils.parseInetSocketAddress(args[1]) );
 		listener.run();
 		listener.close();
 	}
