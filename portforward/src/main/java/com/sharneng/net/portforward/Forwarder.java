@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,27 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.sharneng.net.portforward;
 
-package org.enterprisepower.net.portforward;
-
-import org.enterprisepower.net.NetUtils;
+import com.sharneng.net.NetUtils;
 
 /**
+ * The command line entry for TCP/IP port forwarding.
  * 
  * @author Kenneth Xu
  * 
  */
-public class Forwarder {
+public final class Forwarder {
 
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) throws Exception {
-		Listener listener = new Listener(NetUtils
-				.parseInetSocketAddress(args[0]), NetUtils
-				.parseInetSocketAddress(args[1]));
-		listener.run();
-		listener.close();
-	}
+    private Forwarder() {
+    }
+
+    /**
+     * The command line entry.
+     * 
+     * @param args
+     *            command line arguments
+     * @throws Exception
+     *             when error occurs
+     */
+    public static void main(String[] args) throws Exception {
+        Listener listener = new Listener(NetUtils.parseInetSocketAddress(args[0]),
+                NetUtils.parseInetSocketAddress(args[1]));
+        listener.run();
+        listener.close();
+    }
 
 }

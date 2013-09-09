@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package org.enterprisepower.net.portforward;
+package com.sharneng.net.portforward;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,34 +27,37 @@ import org.apache.commons.logging.LogFactory;
  * @author Kenneth Xu
  * 
  */
-public class Cleaner implements Runnable {
-	private static final Log log = LogFactory.getLog(Cleaner.class);
+class Cleaner implements Runnable {
+    private static final int CLEAN_INTERVAL = 3000;
 
-	List<Cleanable> list = new ArrayList<Cleanable>();
+    private static final Log log = LogFactory.getLog(Cleaner.class);
 
-	public void run() {
-		cleanup();
-	}
+    private final List<Cleanable> list = new ArrayList<Cleanable>();
 
-	public synchronized void cleanup() {
-		while (true) {
-			for (Iterator<Cleanable> itr = list.iterator(); itr.hasNext();) {
-				Cleanable p = itr.next();
-				if (p.isCompleted()) {
-					p.close();
-					itr.remove();
-				}
-			}
-			try {
-				wait(3000);
-			} catch (InterruptedException e) {
-				log.error(e.getMessage(), e);
-			}
-		}
-	}
+    @Override
+    public void run() {
+        while (true) {
+            cleanup();
+            try {
+                wait(CLEAN_INTERVAL);
+            } catch (InterruptedException e) {
+                log.error(e.getMessage(), e);
+            }
+        }
+    }
 
-	public synchronized void add(Cleanable p) {
-		list.add(p);
-	}
+    private synchronized void cleanup() {
+        for (Iterator<Cleanable> itr = list.iterator(); itr.hasNext();) {
+            Cleanable p = itr.next();
+            if (p.isCompleted()) {
+                p.close();
+                itr.remove();
+            }
+        }
+    }
+
+    public synchronized void add(Cleanable p) {
+        list.add(p);
+    }
 
 }

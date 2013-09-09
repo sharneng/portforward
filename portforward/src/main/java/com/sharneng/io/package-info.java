@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 /**
- * Classes to implement the TCP/IP port forwarding.
+ * General purpose utilities.
  * 
  * @author Kenneth Xu
  */
 @com.sharneng.util.NonnullByDefault
-package com.sharneng.net.portforward;
+package com.sharneng.io;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,71 +13,98 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package org.enterprisepower.net.portforward;
+package com.sharneng.net.portforward;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import java.net.*;
-import java.io.*;
+
+import java.io.Closeable;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+
+import javax.annotation.CheckForNull;
 
 /**
+ * Listens on the given port to accept connection and forward it to target.
  * 
  * @author Kenneth Xu
  * 
  */
-public class Listener implements Runnable {
-	private static Log log = LogFactory.getLog(Listener.class);
-	private ServerSocket serverSocket;
-	private InetSocketAddress from, to;
-	private Throwable exception;
-	private Cleaner cleaner = new Cleaner();
+public class Listener implements Runnable, Closeable {
+    private static Log log = LogFactory.getLog(Listener.class);
+    private final ServerSocket serverSocket;
+    private final InetSocketAddress from, to;
+    @CheckForNull
+    private Throwable exception;
+    private final Cleaner cleaner = new Cleaner();
 
-	public Throwable getException() {
-		return exception;
-	}
+    /**
+     * Gets the exception occurred if any.
+     * 
+     * @return the exception if any error occurred
+     */
+    @CheckForNull
+    public Throwable getException() {
+        return exception;
+    }
 
-	public Listener(InetSocketAddress from, InetSocketAddress to)
-			throws IOException {
-		this.from = from;
-		this.to = to;
-		serverSocket = new ServerSocket();
-		serverSocket.setReuseAddress(true);
-		serverSocket.bind(from);
-		String hostname = from.getHostName();
-		if (hostname == null)
-			hostname = "*";
-		log.info("Ready to accept client connection on " + hostname + ":"
-				+ from.getPort());
-	}
+    /**
+     * Constructs a new instance of Listener.
+     * 
+     * @param from
+     *            the address to listen for connections
+     * @param to
+     *            the address to forward connections to
+     * @throws IOException
+     *             when something is not going write when network operation
+     */
+    public Listener(InetSocketAddress from, InetSocketAddress to) throws IOException {
+        this.from = from;
+        this.to = to;
+        serverSocket = new ServerSocket();
+        serverSocket.setReuseAddress(true);
+        serverSocket.bind(from);
+        String hostname = from.getHostName();
+        if (hostname == null) hostname = "*";
+        log.info("Ready to accept client connection on " + hostname + ":" + from.getPort());
+    }
 
-	public void run() {
-		Socket source = null;
-		new Thread(cleaner).start();
-		while (true) {
-			try {
-				TargetConnector connector = new TargetConnector(to);
-				source = serverSocket.accept();
-				log.trace("accepted client connection");
-				Socket target = connector.openSocket();
-				new Processor(source, target, cleaner).process();
-			} catch (IOException e) {
-				String msg = "Failed to accept client connection on port "
-						+ from.getPort();
-				log.error(msg, e);
-				exception = e;
-				return;
-			}
-		}
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void run() {
+        Socket source = null;
+        new Thread(cleaner).start();
+        while (true) {
+            try {
+                TargetConnector connector = new TargetConnector(to);
+                source = serverSocket.accept();
+                log.trace("accepted client connection");
+                Socket target = connector.openSocket();
+                new Processor(source, target, cleaner).process();
+            } catch (IOException e) {
+                String msg = "Failed to accept client connection on port " + from.getPort();
+                log.error(msg, e);
+                exception = e;
+                return;
+            }
+        }
+    }
 
-	public void close() {
-		if (!serverSocket.isClosed()) {
-			try {
-				serverSocket.close();
-			} catch (IOException e) {
-				log.error(e.getMessage(), e);
-			}
-		}
-	}
+    /**
+     * Closes this listener and associated resources.
+     */
+    @Override
+    public void close() {
+        if (!serverSocket.isClosed()) {
+            try {
+                serverSocket.close();
+            } catch (IOException e) {
+                log.error(e.getMessage(), e);
+            }
+        }
+    }
 }

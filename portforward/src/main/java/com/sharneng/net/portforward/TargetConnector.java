@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,29 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package org.enterprisepower.net.portforward;
+package com.sharneng.net.portforward;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import java.net.*;
+
+import java.net.InetSocketAddress;
+import java.net.Socket;
 
 /**
  * 
  * @author Kenneth Xu
  * 
  */
-public class TargetConnector {
-	private static Log log = LogFactory.getLog(TargetConnector.class);
-	private InetSocketAddress to;
+class TargetConnector {
+    private static Log log = LogFactory.getLog(TargetConnector.class);
+    private final InetSocketAddress to;
 
-	public TargetConnector(InetSocketAddress to) {
-		log.trace("new ServerConnectionManager( InetSocketAddress )");
-		this.to = to;
-	}
+    public TargetConnector(InetSocketAddress to) {
+        log.trace("new ServerConnectionManager( InetSocketAddress )");
+        this.to = to;
+    }
 
-	public Socket openSocket() throws java.io.IOException {
-		return new Socket(to.getAddress(), to.getPort());
-	}
+    public Socket openSocket() throws java.io.IOException {
+        return new Socket(to.getAddress(), to.getPort());
+    }
 
 }
